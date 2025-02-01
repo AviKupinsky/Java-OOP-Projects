@@ -1,0 +1,174 @@
+rotem.weissman
+avikupinsky
+
+=====File description======
+
+Method - this class handles all method related lines.
+RegularExpressions - a class to obtain all the necessary regular expressions. this class also creates all the
+Patterns needed for the rest of the solution.
+Scope - a class to organize the code, handles a scope of code. handles simple scope and an if/while scope
+Sjavac - the main function, calls for a global round and a methods round and handles exceptions
+SjvacExceptions - the exception that we throw in case of an error in the s-java file
+Variable - a class to save all the necessary information of each variable
+VariableFactory - a class to create a Variable instance easily
+HashMapVariable - a data structure to save all the variables. - more information at the design
+
+=====design========
+Variable - The variable class design is based on the mode design pattern. Each variable created should behave
+differently based on its Type, whether or not its initialized of whether or not its Final. So we decided
+instead of creating an abstract class for variable and then implement it for each different type and for final
+or not and for initialize or not, to create a variable with those modes and the variable behaves according to
+its modes.
+VariableFactory - because of the different behaviours according to the modes, and to keep the code adjustable
+and simple we created the Factory. the factory receives the information about the variable and make sure that
+the variable its creating will behave accordingly. For example, it gets the type and create a list of all
+allowed types to be assigned to that variable as well as a Pattern list that help us decide if an assignment
+is valid or not.
+HashMapVariable - The HashMapVariable contains 2 HashMaps<varName, Variable> one for the current scope and
+another for the outerScope. Variable from each map should behave differently, that is why we decided on that
+structure. Each scope our code gets into a copy constructor deep copy the last scope's HashMapVariable. that
+way we make sure that when the scope closes, all variables get back to the status they were before, as
+instructed.
+Method and Scope - At first we though that the flow of the code should be in Sjavac. However the code became
+long and it was getting tough to understand it or its flow. So we decided to split the code into logical
+classes, each handles a specific part of the code.
+methods data structure - HashMap<methodName, argumentsTypes>, we save at the global run all the methods in
+this data structure, so that when called we can compare the argument types with the variables supplied to the
+function call.
+
+
+====Implementation issues====
+Our most time consuming task of this exercise was to decide on the Variable and HashMapVariable design. it was
+challenging because that as we kept reading the instructions again and again, we continued to encounter more
+and more behaviours that we wanted to come up with a design that satisfy all of them.
+One of the issues we faced was to save all the global variables and methods in the global run and not saving
+them on the methods run while not duplicating code. We could copy and paste a lot of code with small
+differences but we decided to have a boolean argument called globalRun which indicate if we are on a global
+run or not. In order to achieve the wanted behaviour we had to add if's and else's so some methods became a
+bit long. Eventually we divided those methods.
+
+=====Exceptions======
+We decided to use exceptions in order to handle the errors in the s-java file. We decided to so because of the
+exception mechanism. First of all if we had returned a value that indicates a success or a failure we will be
+giving up the option to return something else, like the rest of the line in many cases. Another reason is the
+simplicity the exception solution gives us in this case, if there is an error, i know that the answer is 1 and
+it doesn't matter what comes next in the file, so its very natural to exit the program and to propagate the
+exception to the main.
+We though of creating 3 types of exceptions one for syntax, one for wrong type, and one for null argument
+usage. However we came to the conclusion that there will be no difference between those exceptions and there
+handling so we created only one class with multiple error massages to chose from.
+
+=====Questions====
+6.2.1 In order to modify out solution to support another types all changes should take place in
+VariableFactory
+and RegularExpressions. In regular expressions, you should add the relevant regex for that type and the name
+of that type to the types regex. In VariableFactory all you need to do is to add a possible type list for
+that type so that the Factory can construct it. All of that could be in VariableFactory however we decided to
+use the RegularExpression class to create some order in out code. If the new type values consist of
+characters other then {0-9.-+} then the extra characters should also be added to a regex checking for a valid
+assignment.
+6.2.2 In order to create different method return types we need to do the following:
+        1. In the methods HashMap we would save as the first argument to be the return value of the method.
+        2. we would have to check in the CompileAssignment method if a var was assigned with a method call, if
+         so we need to save that var type and compare it with the first argument saved in line 1.
+      In order to add Using methods of standard java for example System.out.println:
+         If the question referred to functions that need no import and we can know them all in advance, then
+         all we need to do is to add them (and their arguments type) to the method HashMap at the main
+         function, meaning to add a method that adds a lot of pre known methods name and arguments to
+         initialize the methods data structure with the known standard java methods.
+
+6.3
+regularExpression1: "((?:[a-zA-Z][_\\w]*)|(?:_[_\\w]+))"
+This regular expression check it a string is a valid argument name. It has 2 options: 1. That name starts with
+ a letter, then the next characters can be {_a-zA-z0-9} even zero times. 2. That name starts with _ and then i
+  must contain at least one more char from the group {_a-zA-z0-9};
+regularExpression2: "(?:"+ALL_BOOLEAN_REGEX + "|" + VAR_NAME_REGEX + ")"
+   ALL_BOOLEAN_REGEX contains all the possible boolean constant values (true, false, int and double)
+   ALL_BOOLEAN_REGEX = "(?:" + IS_BOOLEAN + "|" + IS_DOUBLE + "|" + IS_INT + ")";
+   VAR_NAME_REGEX is regularExpression1.
+   notice that all the brackets in this expression start with ?: that's because that we wanted to get the
+   variable name (if its a variable name) so that the next step of the program is to check if its a boolean
+   supporting type and if its initialized.
+
+=====Testing======
+
+Test_001
+checks a lot of scenarios were the code is correct and should return 0.
+
+
+// from here all the tests should fail and return 1
+Test_002
+checks if we give a value to final value after we given it one.
+
+
+Test_003
+checks if given the same name to different types.
+
+
+Test_004
+checks given twice "+" sign to a int.
+
+
+Test_005
+checks if a name stars with the format it should (it should fail here because it start with a number).
+
+
+Test_006
+checks if a name stars with the format it should (it should fail here because it start with a "_").
+
+
+Test_007
+checks operators on the values.
+
+
+Test_008
+checks in function when we declare a final on the argument and trying to change it.
+
+
+Test_009
+checks if we give a function a invalid type.
+
+
+Test_010
+checks if the return is in the end of the function
+
+
+Test_011
+checks giving a double value to a int in the function
+
+
+Test_012
+checks that there is "," between names in int
+
+
+Test_013
+checks giving a local value from a global value that was not realize.
+
+
+Test_014
+checks giving a local value from a function that returns null.
+
+
+Test_015
+checks giving a local value from a global that was not realize, but was realize in a different function.
+
+
+Test_016
+checks giving a function that it ends with curly buckets.
+
+
+Test_017
+checks if we hav given a bad comment.
+
+
+Test_018
+checks if giving a "if" terms of a string.
+
+
+Test_019
+checks if giving a "if" has no terms at all.
+
+
+Test_020
+checks if giving a "while" terms of a string.
+
